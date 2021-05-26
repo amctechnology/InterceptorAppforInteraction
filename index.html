@@ -10,6 +10,11 @@
 
 		<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
 		<script>
+			function sleep(time) {
+				return new Promise((resolve,reject)=>{
+					window.setTimeout(() => resolve(null), time);
+				})
+			}
 			var logger = new amcTechnologydavinciApi.Logger('SampleApp'); // initializes logger function
 
 
@@ -17,19 +22,30 @@
 			amcTechnologydavinciApi.registerOperationInterceptor([
 				amcTechnologydavinciApi.OPERATIONS.INTERACTION],
 				async (payload) => {
-					console.info('INTERCEPTED!! ', payload);
+					console.log('INTERCEPTED!! ', payload);
+					if(payload.didTimeout) {
+						console.log('TIMEOUT INTERCEPTOR');
+					}
+					//await sleep(10*1000);
 
 					if(payload.didTimeout){
-						console.error("TIMMEOUT INTERCEPTOR");
+
 					}else{
 						let operation;
 						payload.message.data[0].details.fields.Phone.Value = "(555) 555-5555"
-						console.info('operation: ', amcTechnologydavinciApi.OPERATIONS[operation]);
+						console.log('operation: ', amcTechnologydavinciApi.OPERATIONS[operation]);
+
+						let details = new amcTechnologydavinciApi.RecordItem("", "", "");
+
+						$.extend(details, payload.message.data[0].details);
+						details.setField("disposition", "", "", '123');
+						
+						payload.message.data[0].details = details;
 					}
 
 					return payload;
 
-				}, 1000, amcTechnologydavinciApi.INTERCEPTOR_TIMEOUT_ACTION.PROCEED_WITH_ORIGINAL
+				}, 5000, amcTechnologydavinciApi.INTERCEPTOR_TIMEOUT_ACTION.PROCEED_WITH_ORIGINAL
 			);
 
 			/*
